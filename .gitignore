@@ -1,10 +1,2 @@
-# python project files
-*.pyproj
-*.sln
-*.suo
-
-# dirs
-obj
-Polygon4
-
-*.exe
+# deny all except force added files
+*
