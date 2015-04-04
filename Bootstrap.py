@@ -12,8 +12,9 @@ project_files       = ['https://www.dropbox.com/s/e7snjoqbcz0k0qy/project_files.
 third_party_files   = ['https://www.dropbox.com/s/37134r4975iclgo/third_party_files.7z?dl=1', 'polygon4_third_party_files.7z']
 
 # executables
-cmake = 'cmake'
-git = 'git'
+cmake   = 'cmake'
+git     = 'git'
+devenv  = 'C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\Common7\\IDE\\devenv.com'
 
 _7z = '7z'
 curl = 'curl'
@@ -31,6 +32,7 @@ def main():
         update_sources(dir)
     download_files(dir)
     run_cmake(dir)
+    build_engine(dir)
     #build project
     #run editor
 
@@ -59,16 +61,25 @@ def update_sources(dir):
     os.chdir(old)
 
 def run_cmake(dir):
-    print('Running CMake')
     dir = dir + '/ThirdParty/'
-    p = subprocess.Popen([cmake,
-                          '-H' + dir + 'Engine',
-                          '-B' + dir + 'Engine/Win64',
-                          '-DBOOST_ROOT=' + dir + 'boost',
-                          '-DBOOST_LIBRARYDIR=' + dir + 'boost/lib64-msvc-12.0/',
-                          '-G', 'Visual Studio 12 Win64'
-                          ])
+    if os.path.exists(dir + 'Engine/Win64') == False:
+        print('Running CMake')
+        p = subprocess.Popen([cmake,
+                              '-H' + dir + 'Engine',
+                              '-B' + dir + 'Engine/Win64',
+                              '-DBOOST_ROOT=' + dir + 'boost',
+                              '-DBOOST_LIBRARYDIR=' + dir + 'boost/lib64-msvc-12.0/',
+                              '-G', 'Visual Studio 12 Win64'
+                              ])
+        p.communicate()
+
+def build_engine(dir):
+    old = os.path.abspath(os.path.curdir)
+    os.chdir(dir + '/ThirdParty/Engine')
+    print('Building Engine')
+    p = subprocess.Popen([cmake, '--build', 'Win64', '--config', 'RelWithDebInfo'])
     p.communicate()
+    os.chdir(old)
 
 def download_file(url, file):
     print('Downloading file: ' + file)
@@ -86,7 +97,6 @@ def download_and_unpack_file(url, file):
         unpack_file(file)
 
 def download_files(dir):
-    print('Downloading project files')
     download_and_unpack_file(project_files[0], project_files[1])
     download_and_unpack_file(content_files[0], content_files[1])
     download_and_unpack_file(third_party_files[0], third_party_files[1])
