@@ -1,0 +1,22 @@
+{
+    "bootstrapper": {
+        "version": 1
+    },
+    "files": [
+        {
+            "name": "content",
+            "url": "https://www.dropbox.com/s/sghc0vmubxcmzvt/content_files.7z?dl=1",
+            "md5": "b5ec123b0ff58bba217a01fdda643abb"
+        },
+        {
+            "name": "project",
+            "url": "https://www.dropbox.com/s/e7snjoqbcz0k0qy/project_files.7z?dl=1",
+            "md5": "0bb9969e5f6bd175ce6396a4ce17fb1a"
+        },
+        {
+            "name": "third_party",
+            "url": "https://www.dropbox.com/s/37134r4975iclgo/third_party_files.7z?dl=1",
+            "md5": "157316959e5b1919ee44cdc9361cdf39"
+        }
+    ]
+}
