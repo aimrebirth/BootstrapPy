@@ -1,0 +1,16 @@
+{
+    "repositories": [
+        {
+            "name": "Polygon4",
+            "unpack_dir": "."
+        },
+        {
+            "name": "Bootstrap",
+            "unpack_dir": "./ThirdParty"
+        },
+        {
+            "name": "Engine",
+            "unpack_dir": "./ThirdParty"
+        }
+    ]
+}
