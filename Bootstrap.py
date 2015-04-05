@@ -10,7 +10,7 @@ import subprocess
 import sys
 
 # version
-bootstrapper_version = 2
+bootstrapper_version = 3
 
 # links
 git_polygon4 = 'https://github.com/aimrebirth/Polygon4.git'
@@ -217,7 +217,10 @@ def download_file(url, file):
 
 def unpack_file(file, data, output_dir):
     if data['downloaded'] == False:
-        return
+        if 'check_path' in data and os.path.exists(polygon4 + '/' + data['check_path']) == False:
+            pass
+        else:
+            return
     print('Unpacking file: ' + file)
     execute_command([_7z, 'x', '-y', '-o' + output_dir, file])
 
