@@ -108,13 +108,10 @@ def check_return_code(c):
     exit(1)
 
 def create_project_files(dir):
-    old = os.path.abspath(os.path.curdir)
-    os.chdir(dir)
     if os.path.exists(os.path.curdir + '/Polygon4.sln'):
         return
     print('Creating project files')
-    execute_command([uvc, '/projectfiles', os.path.abspath(os.path.curdir) + '/Polygon4.uproject'])
-    os.chdir(old)
+    execute_command([uvc, '/projectfiles', dir + '/Polygon4.uproject'])
     space()
 
 def print_version():
