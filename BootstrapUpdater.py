@@ -5,16 +5,12 @@ import os
 import shutil
 import subprocess
 
-bootstrap_updater_version = 1
+from polygon4bootstrap import *
 
-BootstrapDownloads = 'BootstrapDownloads/'
-BootstrapPrograms  = 'BootstrapPrograms/'
+bootstrap_updater_version = 2
 
-bootstrap = 'https://www.dropbox.com/s/0zhbgb1ftspcv9w/polygon4.zip?dl=1'
-bootstrap_zip = BootstrapDownloads + 'bootstrap.zip'
-
-_7z  = BootstrapPrograms + '7za'
-curl = BootstrapPrograms + 'curl'
+_7z  = '7za'
+curl = 'curl'
 
 def main():
     print_version()

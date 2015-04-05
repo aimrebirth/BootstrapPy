@@ -1,6 +1,22 @@
 {
-    "bootstrapper": {
-        "version": 3
+    "name": "Polygon4",
+    "bootstrap": {
+        "version": 3,
+        "BootstrapDownloads": "BootstrapDownloads",
+        "BootstrapPrograms": "BootstrapPrograms",
+        "url": "https://www.dropbox.com/s/0zhbgb1ftspcv9w/polygon4.zip?dl=1",
+        "updater": {
+            "version": 2,
+            "archive_name": "bootstrap.zip"
+        },
+        "programs": {
+            "url": "https://www.dropbox.com/s/rsquemszmp7eg90/BootstrapPrograms.zip?dl=1"
+        }
+    },
+    "git": {
+        "url": "https://github.com/aimrebirth/Polygon4.git",
+        "url_format": "https://github.com/aimrebirth/{0}/archive/master.zip",
+        "master_suffix": "-master"
     },
     "file_prefix": "Polygon4_",
     "files": [
@@ -21,6 +37,24 @@
             "url": "https://www.dropbox.com/s/n4gcapezsf7g4f7/third_party.7z?dl=1",
             "md5": "4cb37171ec570905ab77d3a33c795a90",
             "check_path": "ThirdParty/boost"
+        },
+        {
+            "name": "binaries.zip",
+            "url": "https://www.dropbox.com/s/gd9ahp1jtd5edfk/binaries.zip?dl=0",
+            "md5": "55366088e27dfdfae300edbfc6c34fa2",
+            "check_path": "Binaries"
         }
-    ]
+    ],
+    "sources": {
+        "repositories": [
+            {
+                "name": "Polygon4",
+                "unpack_dir": ""
+            },
+            {
+                "name": "Engine",
+                "unpack_dir": "ThirdParty"
+            }
+        ]
+    }
 }
