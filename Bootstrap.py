@@ -13,70 +13,116 @@ bootstrapper_version = 1
 # links
 git_polygon4 = 'https://github.com/aimrebirth/Polygon4.git'
 
-# executables
-cmake   = 'cmake'
-git     = 'git'
-#devenv  = 'C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\Common7\\IDE\\devenv.com'
-
-_7z = '7z'
-curl = 'curl'
-
-_7z_ext = '.7z'
-
 # names
 polygon4 = 'Polygon4'
 data_file = '/ThirdParty/Bootstrap/Bootstrap.json'
 
+BootstrapDownloads = 'BootstrapDownloads/'
+BootstrapPrograms  = 'BootstrapPrograms/'
+
+# executables
+cmake   = 'cmake'
+git     = 'git'
+msbuild = r'C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe'
+
+_7z     = BootstrapPrograms + '7za'
+curl    = BootstrapPrograms + 'curl'
+uvc     = BootstrapPrograms + 'UnrealVersionSelector'
+
+_7z_ext = '.7z'
+
 def main():
+    print_version()
     base_dir = os.path.abspath(os.path.curdir) + '/'
     dir = base_dir + polygon4
+    download_dir = base_dir + BootstrapDownloads
     if os.path.exists(dir) == False:
         os.mkdir(dir)
         download_sources(dir)
     else:
         update_sources(dir)
-    space()
     data = self_check(dir)
-    space()
-    download_files(dir, data)
-    space()
-    unpack_files(dir, data)
-    space()
+    if os.path.exists(download_dir) == False:
+        os.mkdir(download_dir)
+    download_files(download_dir, data)
+    unpack_files(download_dir, data)
     run_cmake(dir)
-    space()
     build_engine(dir)
-    #build project
-    #run editor
+    create_project_files(dir)
+    build_project(dir)
+    print('Bootstrapping is finished. You may run now Polygon4.uproject.')
+    #exit(0)
+
+def build_project(dir):
+    old = os.path.abspath(os.path.curdir)
+    os.chdir(dir)
+    print('Building Polygon4 Unreal project')
+    space()
+    p = subprocess.Popen([msbuild, 'Polygon4.sln', '/property:Configuration=Development Editor', '/property:Platform=Windows', '/m'])
+    p.communicate()
+    check_return_code(p.returncode)
+    os.chdir(old)
+    space()
+
+def check_return_code(c):
+    if c == 0:
+        return
+    space()
+    print('Last bootstrap step failed')
+    exit(1)
+
+def create_project_files(dir):
+    old = os.path.abspath(os.path.curdir)
+    os.chdir(dir)
+    if os.path.exists(os.path.curdir + '/Polygon4.uproject'):
+        return
+    print('Creating project files')
+    p = subprocess.Popen([uvc, '/projectfiles', os.path.abspath(os.path.curdir) + '/Polygon4.uproject'])
+    p.communicate()
+    check_return_code(p.returncode)
+    os.chdir(old)
+    space()
+
+def print_version():
+    print('Polygon-4 Bootstrapper Version ' + str(bootstrapper_version))
+    space()
 
 def self_check(dir):
-    print('Performing self check')
+    check = 'Performing self check'
     err = 'Critical error: cannot do a self check'
     file = dir + data_file
     f = None
     try:
         f = open(file)
     except:
+        print(check)
         print(err)
         print('Base file: ' + polygon4 + data_file + ' is not found!')
-        sys.exit(1)
+        exit(1)
     data = None
     try:
         data = json.load(f)
     except:
+        print(check)
         print(err)
         print('Base file: ' + polygon4 + data_file + ' has errors in json structure!')
-        sys.exit(1)
+        exit(1)
     self = data['bootstrapper']
-    if self['version'] < bootstrapper_version:
-        print(err)
-        print('You are in the future! The version of your bootstrapper is higher than maximum possible.')
-        sys.exit(1)
-    if self['version'] > bootstrapper_version:
-        print('WARNING:')
-        print('There are newer version (' + str(self['version']) + ') of bootstrapper.')
-        print('Your version is (' + str(bootstrapper_version) + ').')
-        print('Please, download it as soon as possible.')
+    if self['version'] != bootstrapper_version:
+        print(check)
+        print('FATAL ERROR:')
+        print('You have wrong version of bootstrapper!')
+        print('Actual version: ' + str(self['version']))
+        print('Your version: ' + str(bootstrapper_version))
+        print('Please, run BootstrapUpdater.exe to update the bootstrapper.')
+        exit(1)
     return data
+
+def exit(code):
+    space()
+    print('Press Enter to continue...')
+    input()
+    sys.exit(code)
 
 def download_sources(dir):
     old = os.path.abspath(os.path.curdir)
@@ -84,11 +130,15 @@ def download_sources(dir):
     print('Downloading latest sources from Github repositories')
     p = subprocess.Popen([git, 'clone', git_polygon4, '.'])
     p.communicate()
+    check_return_code(p.returncode)
     p = subprocess.Popen([git, 'submodule', 'init'])
     p.communicate()
+    check_return_code(p.returncode)
     p = subprocess.Popen([git, 'submodule', 'update'])
     p.communicate()
+    check_return_code(p.returncode)
     os.chdir(old)
+    space()
 
 def update_sources(dir):
     old = os.path.abspath(os.path.curdir)
@@ -96,15 +146,20 @@ def update_sources(dir):
     print('Updating latest sources from Github repositories')
     p = subprocess.Popen([git, 'pull', 'origin', 'master'])
     p.communicate()
+    check_return_code(p.returncode)
     p = subprocess.Popen([git, 'submodule', 'init'])
     p.communicate()
+    check_return_code(p.returncode)
     p = subprocess.Popen([git, 'submodule', 'update'])
     p.communicate()
+    check_return_code(p.returncode)
     os.chdir(old)
+    space()
 
 def run_cmake(dir):
     dir = dir + '/ThirdParty/'
-    if os.path.exists(dir + 'Engine/Win64') == False:
+    file = dir + 'Engine/Win64/Engine.sln'
+    if os.path.exists(file) == False:
         print('Running CMake')
         p = subprocess.Popen([cmake,
                               '-H' + dir + 'Engine',
@@ -114,19 +169,26 @@ def run_cmake(dir):
                               '-G', 'Visual Studio 12 Win64'
                               ])
         p.communicate()
+        check_return_code(p.returncode)
+        if os.path.exists(file) == False:
+            check_return_code(1)
+        space()
 
 def build_engine(dir):
-    old = os.path.abspath(os.path.curdir)
-    os.chdir(dir + '/ThirdParty/Engine')
     print('Building Engine')
-    p = subprocess.Popen([cmake, '--build', 'Win64', '--config', 'RelWithDebInfo'])
+    space()
+    #p = subprocess.Popen([msbuild, dir + '/ThirdParty/Engine/Win64/Engine.sln', '/property:Configuration=RelWithDebInfo', '/property:Platform=x64', '/m'])
+    p = subprocess.Popen([cmake, '--build', dir + '/ThirdParty/Engine/Win64/', '--config', 'RelWithDebInfo'])
     p.communicate()
-    os.chdir(old)
+    check_return_code(p.returncode)
+    space()
 
 def download_file(url, file):
     print('Downloading file: ' + file)
     p = subprocess.Popen([curl, '-L', '-k', '-o', file, url])
     p.communicate()
+    check_return_code(p.returncode)
+    space()
 
 def unpack_file(file, data):
     if data['downloaded'] == False:
@@ -134,6 +196,7 @@ def unpack_file(file, data):
     print('Unpacking file: ' + file)
     p = subprocess.Popen([_7z, 'x', '-y', '-o' + polygon4, file])
     p.communicate()
+    check_return_code(p.returncode)
 
 def try_download_file(url, file, hash, data):
     data['downloaded'] = False
@@ -142,20 +205,18 @@ def try_download_file(url, file, hash, data):
         data['downloaded'] = True
         if md5(file) != hash:
             print('Wrong file is located on server! Cannot proceed.')
-            sys.exit(1)
+            exit(1)
 
 def create_7z_file_name(file):
     return polygon4 + '_' + file + _7z_ext
 
 def download_files(dir, data):
-    print('Trying to download new files')
     for d in data['files']:
-        try_download_file(d['url'], create_7z_file_name(d['name']), d['md5'], d)
+        try_download_file(d['url'], dir + create_7z_file_name(d['name']), d['md5'], d)
 
 def unpack_files(dir, data):
-    print('Unpacking files')
     for d in data['files']:
-        unpack_file(create_7z_file_name(d['name']), d)
+        unpack_file(dir + create_7z_file_name(d['name']), d)
 
 def md5(file):
     md5 = hashlib.md5()

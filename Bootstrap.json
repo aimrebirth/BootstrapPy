@@ -5,18 +5,18 @@
     "files": [
         {
             "name": "content",
-            "url": "https://www.dropbox.com/s/sghc0vmubxcmzvt/content_files.7z?dl=1",
+            "url": "https://www.dropbox.com/s/e33b37pje827lcx/content.7z?dl=1",
             "md5": "b5ec123b0ff58bba217a01fdda643abb"
         },
         {
             "name": "project",
-            "url": "https://www.dropbox.com/s/e7snjoqbcz0k0qy/project_files.7z?dl=1",
+            "url": "https://www.dropbox.com/s/8laida8yzai6vyt/project.7z?dl=1",
             "md5": "0bb9969e5f6bd175ce6396a4ce17fb1a"
         },
         {
             "name": "third_party",
-            "url": "https://www.dropbox.com/s/37134r4975iclgo/third_party_files.7z?dl=1",
-            "md5": "157316959e5b1919ee44cdc9361cdf39"
+            "url": "https://www.dropbox.com/s/n4gcapezsf7g4f7/third_party.7z?dl=1",
+            "md5": "4cb37171ec570905ab77d3a33c795a90"
         }
     ]
 }
