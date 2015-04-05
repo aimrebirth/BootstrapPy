@@ -1,2 +1,7 @@
-# deny all except force added files
-*
+#
+__pycache__
+dist
+obj
+*.sln
+*.suo
+*.pyproj
