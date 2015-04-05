@@ -108,7 +108,7 @@ def check_return_code(c):
     exit(1)
 
 def create_project_files(dir):
-    if os.path.exists(os.path.curdir + '/Polygon4.sln'):
+    if os.path.exists(dir + '/Polygon4.sln'):
         return
     print('Creating project files')
     execute_command([uvc, '/projectfiles', dir + '/Polygon4.uproject'])
