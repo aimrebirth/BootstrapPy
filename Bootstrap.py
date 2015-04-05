@@ -74,7 +74,7 @@ def check_return_code(c):
 def create_project_files(dir):
     old = os.path.abspath(os.path.curdir)
     os.chdir(dir)
-    if os.path.exists(os.path.curdir + '/Polygon4.uproject'):
+    if os.path.exists(os.path.curdir + '/Polygon4.sln'):
         return
     print('Creating project files')
     p = subprocess.Popen([uvc, '/projectfiles', os.path.abspath(os.path.curdir) + '/Polygon4.uproject'])
