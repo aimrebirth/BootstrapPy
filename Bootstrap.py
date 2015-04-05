@@ -1,14 +1,16 @@
 #!/usr/bin/python3
 # -*- coding: utf8 -*-
 
+from distutils import dir_util
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 
 # version
-bootstrapper_version = 1
+bootstrapper_version = 2
 
 # links
 git_polygon4 = 'https://github.com/aimrebirth/Polygon4.git'
@@ -16,6 +18,11 @@ git_polygon4 = 'https://github.com/aimrebirth/Polygon4.git'
 # names
 polygon4 = 'Polygon4'
 data_file = '/ThirdParty/Bootstrap/Bootstrap.json'
+inet_data_file = 'https://raw.githubusercontent.com/aimrebirth/Bootstrap/master/Bootstrap.json'
+inet_src_file = 'https://raw.githubusercontent.com/aimrebirth/Bootstrap/master/Sources.json'
+src_file = 'Sources.json'
+github_repo = 'https://github.com/aimrebirth/{0}/archive/master.zip'
+master_suffix = '-master'
 
 BootstrapDownloads = 'BootstrapDownloads/'
 BootstrapPrograms  = 'BootstrapPrograms/'
@@ -30,6 +37,7 @@ curl    = BootstrapPrograms + 'curl'
 uvc     = BootstrapPrograms + 'UnrealVersionSelector'
 
 _7z_ext = '.7z'
+zip_ext = '.zip'
 
 def main():
     print_version()
@@ -38,10 +46,14 @@ def main():
     download_dir = base_dir + BootstrapDownloads
     if os.path.exists(dir) == False:
         os.mkdir(dir)
-        download_sources(dir)
+    if has_program_in_path(git):
+        if os.path.exists(dir + '/.git') == False:
+            download_sources(dir)
+        else:
+            update_sources(dir)
     else:
-        update_sources(dir)
-    data = self_check(dir)
+        manual_download()
+    data = self_check(dir + data_file)
     if os.path.exists(download_dir) == False:
         os.mkdir(download_dir)
     download_files(download_dir, data)
@@ -51,16 +63,40 @@ def main():
     create_project_files(dir)
     build_project(dir)
     print('Bootstrapping is finished. You may run now Polygon4.uproject.')
-    #exit(0)
+
+def manual_download():
+    file = BootstrapDownloads + src_file
+    download_file(inet_src_file, file)
+    data = load_json(file)
+    for r in data['repositories']:
+        url = github_repo.format(r['name'])
+        file = BootstrapDownloads + r['name'] + master_suffix + zip_ext
+        download_file(url, file)
+    for r in data['repositories']:
+        dir = BootstrapDownloads + r['name'] + master_suffix
+        file = dir + zip_ext
+        r['downloaded'] = True
+        unpack_file(file, r, BootstrapDownloads)
+        src = BootstrapDownloads + r['name'] + master_suffix
+        dst = polygon4
+        if r['name'] != 'Polygon4':
+            dst = dst + '/' + r['unpack_dir'] + '/' + r['name']
+        dir_util.copy_tree(src, dst)
+
+def has_program_in_path(prog):
+    try:
+        execute_command([prog], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    except:
+        print('Warning: "' + prog + '" is missing in your PATH environment variable')
+        return False
+    return True
 
 def build_project(dir):
     old = os.path.abspath(os.path.curdir)
     os.chdir(dir)
     print('Building Polygon4 Unreal project')
     space()
-    p = subprocess.Popen([msbuild, 'Polygon4.sln', '/property:Configuration=Development Editor', '/property:Platform=Windows', '/m'])
-    p.communicate()
-    check_return_code(p.returncode)
+    execute_command([msbuild, 'Polygon4.sln', '/property:Configuration=Development Editor', '/property:Platform=Windows', '/m'])
     os.chdir(old)
     space()
 
@@ -77,9 +113,7 @@ def create_project_files(dir):
     if os.path.exists(os.path.curdir + '/Polygon4.sln'):
         return
     print('Creating project files')
-    p = subprocess.Popen([uvc, '/projectfiles', os.path.abspath(os.path.curdir) + '/Polygon4.uproject'])
-    p.communicate()
-    check_return_code(p.returncode)
+    execute_command([uvc, '/projectfiles', os.path.abspath(os.path.curdir) + '/Polygon4.uproject'])
     os.chdir(old)
     space()
 
@@ -87,17 +121,14 @@ def print_version():
     print('Polygon-4 Bootstrapper Version ' + str(bootstrapper_version))
     space()
 
-def self_check(dir):
-    check = 'Performing self check'
-    err = 'Critical error: cannot do a self check'
-    file = dir + data_file
+def load_json(file):
     f = None
     try:
         f = open(file)
     except:
         print(check)
         print(err)
-        print('Base file: ' + polygon4 + data_file + ' is not found!')
+        print('Json file: ' + file + ' is not found!')
         exit(1)
     data = None
     try:
@@ -105,8 +136,14 @@ def self_check(dir):
     except:
         print(check)
         print(err)
-        print('Base file: ' + polygon4 + data_file + ' has errors in json structure!')
+        print('Json file: ' + file + ' has errors in its structure!')
         exit(1)
+    return data
+
+def self_check(file):
+    check = 'Performing self check'
+    err = 'Critical error: cannot do a self check'
+    data = load_json(file)
     self = data['bootstrapper']
     if self['version'] != bootstrapper_version:
         print(check)
@@ -128,15 +165,13 @@ def download_sources(dir):
     old = os.path.abspath(os.path.curdir)
     os.chdir(dir)
     print('Downloading latest sources from Github repositories')
-    p = subprocess.Popen([git, 'clone', git_polygon4, '.'])
-    p.communicate()
-    check_return_code(p.returncode)
-    p = subprocess.Popen([git, 'submodule', 'init'])
-    p.communicate()
-    check_return_code(p.returncode)
-    p = subprocess.Popen([git, 'submodule', 'update'])
-    p.communicate()
-    check_return_code(p.returncode)
+    execute_command([git, 'clone', git_polygon4, '.'])
+    if os.path.exists('.git') == False:
+        execute_command([git, 'init'])
+        execute_command([git, 'remote', 'add', 'origin', git_polygon4])
+        execute_command([git, 'fetch'])
+        execute_command([git, 'reset', 'origin/master', '--hard'])
+    download_submodules()
     os.chdir(old)
     space()
 
@@ -144,32 +179,27 @@ def update_sources(dir):
     old = os.path.abspath(os.path.curdir)
     os.chdir(dir)
     print('Updating latest sources from Github repositories')
-    p = subprocess.Popen([git, 'pull', 'origin', 'master'])
-    p.communicate()
-    check_return_code(p.returncode)
-    p = subprocess.Popen([git, 'submodule', 'init'])
-    p.communicate()
-    check_return_code(p.returncode)
-    p = subprocess.Popen([git, 'submodule', 'update'])
-    p.communicate()
-    check_return_code(p.returncode)
+    execute_command([git, 'pull', 'origin', 'master'])
+    download_submodules()
     os.chdir(old)
     space()
+
+def download_submodules():
+    execute_command([git, 'submodule', 'init'])
+    execute_command([git, 'submodule', 'update'])
 
 def run_cmake(dir):
     dir = dir + '/ThirdParty/'
     file = dir + 'Engine/Win64/Engine.sln'
     if os.path.exists(file) == False:
         print('Running CMake')
-        p = subprocess.Popen([cmake,
-                              '-H' + dir + 'Engine',
-                              '-B' + dir + 'Engine/Win64',
-                              '-DBOOST_ROOT=' + dir + 'boost',
-                              '-DBOOST_LIBRARYDIR=' + dir + 'boost/lib64-msvc-12.0/',
-                              '-G', 'Visual Studio 12 Win64'
-                              ])
-        p.communicate()
-        check_return_code(p.returncode)
+        execute_command([cmake,
+                            '-H' + dir + 'Engine',
+                            '-B' + dir + 'Engine/Win64',
+                            '-DBOOST_ROOT=' + dir + 'boost',
+                            '-DBOOST_LIBRARYDIR=' + dir + 'boost/lib64-msvc-12.0/',
+                            '-G', 'Visual Studio 12 Win64'
+                            ])
         if os.path.exists(file) == False:
             check_return_code(1)
         space()
@@ -177,26 +207,19 @@ def run_cmake(dir):
 def build_engine(dir):
     print('Building Engine')
     space()
-    #p = subprocess.Popen([msbuild, dir + '/ThirdParty/Engine/Win64/Engine.sln', '/property:Configuration=RelWithDebInfo', '/property:Platform=x64', '/m'])
-    p = subprocess.Popen([cmake, '--build', dir + '/ThirdParty/Engine/Win64/', '--config', 'RelWithDebInfo'])
-    p.communicate()
-    check_return_code(p.returncode)
+    execute_command([cmake, '--build', dir + '/ThirdParty/Engine/Win64/', '--config', 'RelWithDebInfo'])
     space()
 
 def download_file(url, file):
     print('Downloading file: ' + file)
-    p = subprocess.Popen([curl, '-L', '-k', '-o', file, url])
-    p.communicate()
-    check_return_code(p.returncode)
+    execute_command([curl, '-L', '-k', '-o', file, url])
     space()
 
-def unpack_file(file, data):
+def unpack_file(file, data, output_dir):
     if data['downloaded'] == False:
         return
     print('Unpacking file: ' + file)
-    p = subprocess.Popen([_7z, 'x', '-y', '-o' + polygon4, file])
-    p.communicate()
-    check_return_code(p.returncode)
+    execute_command([_7z, 'x', '-y', '-o' + output_dir, file])
 
 def try_download_file(url, file, hash, data):
     data['downloaded'] = False
@@ -207,16 +230,13 @@ def try_download_file(url, file, hash, data):
             print('Wrong file is located on server! Cannot proceed.')
             exit(1)
 
-def create_7z_file_name(file):
-    return polygon4 + '_' + file + _7z_ext
-
 def download_files(dir, data):
     for d in data['files']:
-        try_download_file(d['url'], dir + create_7z_file_name(d['name']), d['md5'], d)
+        try_download_file(d['url'], dir + data['file_prefix'] + d['name'], d['md5'], d)
 
 def unpack_files(dir, data):
     for d in data['files']:
-        unpack_file(dir + create_7z_file_name(d['name']), d)
+        unpack_file(dir + data['file_prefix'] + d['name'], d, polygon4)
 
 def md5(file):
     md5 = hashlib.md5()
@@ -227,6 +247,24 @@ def md5(file):
             break
         md5.update(data)
     return md5.hexdigest()
+
+def execute_command(args, bufsize=-1, executable=None,
+                    stdin=None, stdout=None, stderr=None,
+                    preexec_fn=None, close_fds=subprocess._PLATFORM_DEFAULT_CLOSE_FDS,
+                    shell=False, cwd=None, env=None, universal_newlines=False,
+                    startupinfo=None, creationflags=0,
+                    restore_signals=True, start_new_session=False,
+                    pass_fds=()):
+    p = subprocess.Popen(
+                    args, bufsize, executable,
+                    stdin, stdout, stderr,
+                    preexec_fn, close_fds,
+                    shell, cwd, env, universal_newlines,
+                    startupinfo, creationflags,
+                    restore_signals, start_new_session,
+                    pass_fds)
+    p.communicate()
+    check_return_code(p.returncode)
 
 def space():
     print()

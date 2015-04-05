@@ -2,15 +2,15 @@
     "repositories": [
         {
             "name": "Polygon4",
-            "unpack_dir": "."
+            "unpack_dir": ""
         },
         {
             "name": "Bootstrap",
-            "unpack_dir": "./ThirdParty"
+            "unpack_dir": "ThirdParty"
         },
         {
             "name": "Engine",
-            "unpack_dir": "./ThirdParty"
+            "unpack_dir": "ThirdParty"
         }
     ]
 }

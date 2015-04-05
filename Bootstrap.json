@@ -1,20 +1,21 @@
 {
     "bootstrapper": {
-        "version": 1
+        "version": 2
     },
+    "file_prefix": "Polygon4_",
     "files": [
         {
-            "name": "content",
+            "name": "content.7z",
             "url": "https://www.dropbox.com/s/e33b37pje827lcx/content.7z?dl=1",
             "md5": "b5ec123b0ff58bba217a01fdda643abb"
         },
         {
-            "name": "project",
+            "name": "project.7z",
             "url": "https://www.dropbox.com/s/8laida8yzai6vyt/project.7z?dl=1",
             "md5": "0bb9969e5f6bd175ce6396a4ce17fb1a"
         },
         {
-            "name": "third_party",
+            "name": "third_party.7z",
             "url": "https://www.dropbox.com/s/n4gcapezsf7g4f7/third_party.7z?dl=1",
             "md5": "4cb37171ec570905ab77d3a33c795a90"
         }
