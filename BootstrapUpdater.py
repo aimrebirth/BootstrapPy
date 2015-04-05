@@ -18,6 +18,8 @@ curl = BootstrapPrograms + 'curl'
 
 def main():
     print_version()
+    if os.path.exists(BootstrapDownloads) == False:
+        os.mkdir(BootstrapDownloads)
     if os.path.exists(bootstrap_zip):
         shutil.copy(bootstrap_zip, bootstrap_zip + '.bak')
     download_file(bootstrap, bootstrap_zip)
