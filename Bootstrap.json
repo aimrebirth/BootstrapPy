@@ -10,7 +10,7 @@
     },
     "git": {
         "url": "https://github.com/aimrebirth/Polygon4.git",
-        "url_format": "https://github.com/aimrebirth/%s/archive/master.zip",
+        "url_format": "https://github.com/aimrebirth/%1%/archive/master.zip",
         "master_suffix": "-master"
     },
     "file_prefix": "Polygon4_",
