@@ -2,20 +2,15 @@
     "name": "Polygon4",
     "bootstrap": {
         "version": 3,
-        "BootstrapDownloads": "BootstrapDownloads",
-        "BootstrapPrograms": "BootstrapPrograms",
         "url": "https://www.dropbox.com/s/0zhbgb1ftspcv9w/polygon4.zip?dl=1",
         "updater": {
             "version": 2,
             "archive_name": "bootstrap.zip"
-        },
-        "programs": {
-            "url": "https://www.dropbox.com/s/rsquemszmp7eg90/BootstrapPrograms.zip?dl=1"
         }
     },
     "git": {
         "url": "https://github.com/aimrebirth/Polygon4.git",
-        "url_format": "https://github.com/aimrebirth/{0}/archive/master.zip",
+        "url_format": "https://github.com/aimrebirth/%s/archive/master.zip",
         "master_suffix": "-master"
     },
     "file_prefix": "Polygon4_",
